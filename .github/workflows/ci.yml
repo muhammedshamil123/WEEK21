@@ -17,7 +17,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v3
         with:
-          go-version: '1.22.5'  # Specify your Go version here
+          go-version: '1.18'  # Specify your Go version here
 
       # Step 3: Install dependencies, test, and build the Go application
       - name: Build Go Application
@@ -41,12 +41,18 @@ jobs:
           echo "$SSH_KEY" > GFRESHPROJECT2024.pem
           chmod 400 GFRESHPROJECT2024.pem
 
-      # Step 6: Download build artifact to EC2 and deploy
+      # Step 6: Deploy to EC2
       - name: Deploy to EC2
         env:
           EC2_USER: ${{ secrets.DEPLOY_USER }}
           EC2_IP: ${{ secrets.DEPLOY_SERVER }}
         run: |
+          # SSH into EC2 and pull the latest code
+          ssh -i GFRESHPROJECT2024.pem -o StrictHostKeyChecking=no $EC2_USER@$EC2_IP << 'EOF'
+            cd /home/ubuntu/WEEK21
+            git pull origin main  # Pull the latest changes
+          EOF
+
           # Upload build artifact to EC2
           scp -i GFRESHPROJECT2024.pem -o StrictHostKeyChecking=no ./user-api $EC2_USER@$EC2_IP:/home/ubuntu/WEEK21/
 
