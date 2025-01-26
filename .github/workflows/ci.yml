@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-      # Step 1: Setup SSH Key
+      # Step 1: Setup SSH Key (Directly Use the Secret)
       - name: Setup SSH Key
         env:
           SSH_KEY: ${{ secrets.DEPLOY_KEY }}
