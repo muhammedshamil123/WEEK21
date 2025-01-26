@@ -46,7 +46,7 @@ jobs:
             cd /home/ubuntu/WEEK21
             go mod tidy
             go test ./... -v
-            go build -o user-api ./cmd/main.go
+            go build -o user-api ./main.go
           EOF
 
       # Step 4: Restart Application Service
