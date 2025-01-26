@@ -7,9 +7,33 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    steps:
 
-      # Step 1: Setup SSH Key (Directly Use the Secret)
+    steps:
+      # Step 1: Checkout the latest code from the repository
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      # Step 2: Set up Go environment on GitHub host server
+      - name: Setup Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: '1.18'  # Specify your Go version here
+
+      # Step 3: Install dependencies, test, and build the Go application
+      - name: Build Go Application
+        run: |
+          go mod tidy
+          go test ./... -v
+          go build -o user-api ./main.go
+
+      # Step 4: Upload build artifact to GitHub
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: user-api
+          path: ./user-api
+
+      # Step 5: Setup SSH key for EC2 connection
       - name: Setup SSH Key
         env:
           SSH_KEY: ${{ secrets.DEPLOY_KEY }}
@@ -17,49 +41,22 @@ jobs:
           echo "$SSH_KEY" > GFRESHPROJECT2024.pem
           chmod 400 GFRESHPROJECT2024.pem
 
-      # Step 2: Connect to EC2 and Pull Latest Code
-      - name: Pull Latest Code from Git
+      # Step 6: Download build artifact to EC2 and deploy
+      - name: Deploy to EC2
         env:
           EC2_USER: ${{ secrets.DEPLOY_USER }}
           EC2_IP: ${{ secrets.DEPLOY_SERVER }}
         run: |
-          ssh -vvv -i GFRESHPROJECT2024.pem -o StrictHostKeyChecking=no $EC2_USER@$EC2_IP << 'EOF'
-            cd /home/ubuntu/WEEK21
-            git pull origin main
-          EOF
+          # Upload build artifact to EC2
+          scp -i GFRESHPROJECT2024.pem -o StrictHostKeyChecking=no ./user-api $EC2_USER@$EC2_IP:/home/ubuntu/WEEK21/
 
-      # Step 3: Build Go Application
-      - name: Testing and Building Go Application
-        env:
-          EC2_USER: ${{ secrets.DEPLOY_USER }}
-          EC2_IP: ${{ secrets.DEPLOY_SERVER }}
-        run: |
+          # SSH into EC2 and restart the service
           ssh -i GFRESHPROJECT2024.pem -o StrictHostKeyChecking=no $EC2_USER@$EC2_IP << 'EOF'
-            # Update system packages
-            sudo apt update
-            sudo apt install -y golang-go
-            
-            # Verify Go installation
-            go version
-
-            # Navigate to the project directory and build the app
             cd /home/ubuntu/WEEK21
-            go mod tidy
-            go test ./... -v
-            go build -o user-api ./main.go
+            sudo systemctl restart thefurnishstore.service
           EOF
 
-      # Step 4: Restart Application Service
-      - name: Restart Application Service
-        env:
-          EC2_USER: ${{ secrets.DEPLOY_USER }}
-          EC2_IP: ${{ secrets.DEPLOY_SERVER }}
-        run: |
-          ssh -i GFRESHPROJECT2024.pem -o StrictHostKeyChecking=no $EC2_USER@$EC2_IP << 'EOF'
-            sudo systemctl restart thefurnishstore.service  
-          EOF
-
-      # Step 5: Cleanup SSH Key
+      # Step 7: Cleanup SSH key
       - name: Cleanup
         run: |
           rm -f GFRESHPROJECT2024.pem
