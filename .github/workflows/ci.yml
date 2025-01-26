@@ -23,12 +23,7 @@ jobs:
         with:
           go-version: 1.22
 
-      # Step 3: Install dependencies
-      - name: Install dependencies
-        run: |
-          go mod tidy
-          go mod download
-
+      
       # Step 4: Run unit tests
       - name: Run unit tests
         run: |
