@@ -19,8 +19,9 @@ func main() {
 
 	r.POST("/users", func(c *gin.Context) {
 		var userInput struct {
-			Name  string `json:"name"`
-			Email string `json:"email"`
+			Name     string `json:"name"`
+			Email    string `json:"email"`
+			Password string `json:"password"`
 		}
 
 		if err := c.BindJSON(&userInput); err != nil {
@@ -29,8 +30,9 @@ func main() {
 		}
 
 		user := &entity.User{
-			Name:  userInput.Name,
-			Email: userInput.Email,
+			Name:     userInput.Name,
+			Email:    userInput.Email,
+			Password: userInput.Password,
 		}
 
 		createdUser, err := useCase.CreateUser(user)
@@ -57,5 +59,4 @@ func main() {
 	if err := r.Run(":8080"); err != nil {
 		log.Fatal("Server failed: ", err)
 	}
-	log.Fatal("hello")
 }
