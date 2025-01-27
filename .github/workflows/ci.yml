@@ -9,30 +9,31 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout the latest code
+      # Step 1: Checkout the latest code from the repository
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      # Step 2: Setup Go environment and build the binary
+      # Step 2: Set up Go environment on GitHub host server
       - name: Setup Go
         uses: actions/setup-go@v3
         with:
-          go-version: '1.22.5'
+          go-version: '1.22.5'  # Specify your Go version here
 
+      # Step 3: Install dependencies, test, and build the Go application
       - name: Build Go Application
         run: |
           go mod tidy
           go test ./... -v
           go build -o user-api ./main.go
 
-      # Step 3: Upload build artifact
+      # Step 4: Upload build artifact to GitHub
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v3
         with:
           name: user-api
           path: ./user-api
 
-      # Step 4: Setup SSH key
+      # Step 5: Setup SSH key for EC2 connection
       - name: Setup SSH Key
         env:
           SSH_KEY: ${{ secrets.DEPLOY_KEY }}
@@ -40,23 +41,25 @@ jobs:
           echo "$SSH_KEY" > GFRESHPROJECT2024.pem
           chmod 400 GFRESHPROJECT2024.pem
 
-      # Step 5: Deploy and restart the service on EC2
+      # Step 6: Deploy to EC2
       - name: Deploy to EC2
         env:
           EC2_USER: ${{ secrets.DEPLOY_USER }}
           EC2_IP: ${{ secrets.DEPLOY_SERVER }}
         run: |
-          # Upload the binary
-          scp -i GFRESHPROJECT2024.pem -o StrictHostKeyChecking=no ./user-api $EC2_USER@$EC2_IP:/home/ubuntu/WEEK21/
+          # Upload the built binary to EC2
+          scp -i GFRESHPROJECT2024.pem -o StrictHostKeyChecking=no ./user-api $EC2_USER@$EC2_IP:/home/ubuntu/WEEK21/user-api
 
-          # Restart the user-api service
+          # SSH into EC2 to restart the service
           ssh -i GFRESHPROJECT2024.pem -o StrictHostKeyChecking=no $EC2_USER@$EC2_IP << 'EOF'
+            # Ensure the binary has execution permissions
             chmod +x /home/ubuntu/WEEK21/user-api
-            sudo systemctl restart user-api.service
-            sudo systemctl status user-api.service
+
+            # Restart the service to apply changes
+            sudo systemctl restart thefurnishstore.service
           EOF
 
-      # Step 6: Cleanup SSH key
+      # Step 7: Cleanup SSH key
       - name: Cleanup
         run: |
           rm -f GFRESHPROJECT2024.pem
