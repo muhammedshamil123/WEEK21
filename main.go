@@ -33,6 +33,7 @@ func main() {
 			Name:     userInput.Name,
 			Email:    userInput.Email,
 			Password: userInput.Password,
+			Hello:    "HELLO",
 		}
 
 		createdUser, err := useCase.CreateUser(user)
