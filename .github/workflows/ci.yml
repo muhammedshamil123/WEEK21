@@ -1,4 +1,4 @@
-name: CI/CD Pipeline for user-api
+name: CI/CD Pipeline for user-api 
 
 on:
   push:
@@ -55,6 +55,14 @@ jobs:
 
           # Upload build artifact to EC2
           scp -i GFRESHPROJECT2024.pem -o StrictHostKeyChecking=no ./user-api $EC2_USER@$EC2_IP:/home/ubuntu/WEEK21/
+
+          # Build thefurnishstore on EC2
+          ssh -i GFRESHPROJECT2024.pem -o StrictHostKeyChecking=no $EC2_USER@$EC2_IP << 'EOF'
+            cd /home/ubuntu/WEEK21/thefurnishstore
+            go mod tidy
+            go test ./... -v
+            go build -o thefurnishstore ./main.go  # Build thefurnishstore app
+          EOF
 
           # SSH into EC2 and restart the service
           ssh -i GFRESHPROJECT2024.pem -o StrictHostKeyChecking=no $EC2_USER@$EC2_IP << 'EOF'
