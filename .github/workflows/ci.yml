@@ -47,7 +47,7 @@ jobs:
           EC2_IP: ${{ secrets.DEPLOY_SERVER }}
         run: |
           # Upload the binary
-          scp -i GFRESHPROJECT2024.pem -o StrictHostKeyChecking=no ./user-api $EC2_USER@$EC2_IP:/home/ubuntu/WEEK21
+          scp -i GFRESHPROJECT2024.pem -o StrictHostKeyChecking=no ./user-api $EC2_USER@$EC2_IP:/home/ubuntu/WEEK21/
 
           # Restart the user-api service
           ssh -i GFRESHPROJECT2024.pem -o StrictHostKeyChecking=no $EC2_USER@$EC2_IP << 'EOF'
