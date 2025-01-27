@@ -43,7 +43,7 @@ func main() {
 		}
 
 		c.JSON(http.StatusOK, createdUser)
-		fmt.Println("Created User")
+		fmt.Println("User is created now")
 	})
 
 	r.GET("/users/:id", func(c *gin.Context) {
@@ -61,5 +61,6 @@ func main() {
 	if err := r.Run(":8080"); err != nil {
 		log.Fatal("Server failed: ", err)
 	}
-	log.Fatal("Server started!")
+	log.Fatal("Server started")
+
 }
