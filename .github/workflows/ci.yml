@@ -47,18 +47,15 @@ jobs:
           EC2_USER: ${{ secrets.DEPLOY_USER }}
           EC2_IP: ${{ secrets.DEPLOY_SERVER }}
         run: |
-          # SSH into EC2 and pull the latest code
-          ssh -i GFRESHPROJECT2024.pem -o StrictHostKeyChecking=no $EC2_USER@$EC2_IP << 'EOF'
-            cd /home/ubuntu/WEEK21
-            git pull origin main  # Pull the latest changes
-          EOF
+          # Upload the built binary to EC2
+          scp -i GFRESHPROJECT2024.pem -o StrictHostKeyChecking=no ./user-api $EC2_USER@$EC2_IP:/home/ubuntu/WEEK21/user-api
 
-          # Upload build artifact to EC2
-          scp -i GFRESHPROJECT2024.pem -o StrictHostKeyChecking=no ./user-api $EC2_USER@$EC2_IP:/home/ubuntu/WEEK21/
-
-          # SSH into EC2 and restart the service
+          # SSH into EC2 to restart the service
           ssh -i GFRESHPROJECT2024.pem -o StrictHostKeyChecking=no $EC2_USER@$EC2_IP << 'EOF'
-            cd /home/ubuntu/WEEK21
+            # Ensure the binary has execution permissions
+            chmod +x /home/ubuntu/WEEK21/user-api
+
+            # Restart the service to apply changes
             sudo systemctl restart thefurnishstore.service
           EOF
 
