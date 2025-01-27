@@ -1,4 +1,4 @@
-name: CI/CD Pipeline for user-api
+name: CI/CD Pipeline for thefurnishstore
 
 on:
   push:
@@ -24,14 +24,14 @@ jobs:
         run: |
           go mod tidy
           go test ./... -v
-          go build -o user-api ./main.go
+          go build -o thefurnishstore ./main.go
 
       # Step 4: Upload build artifact to GitHub
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v3
         with:
-          name: user-api
-          path: ./user-api
+          name: thefurnishstore
+          path: ./thefurnishstore
 
       # Step 5: Setup SSH key for EC2 connection
       - name: Setup SSH Key
@@ -48,12 +48,12 @@ jobs:
           EC2_IP: ${{ secrets.DEPLOY_SERVER }}
         run: |
           # Upload the built binary to EC2
-          scp -i GFRESHPROJECT2024.pem -o StrictHostKeyChecking=no ./user-api $EC2_USER@$EC2_IP:/home/ubuntu/WEEK21/user-api
+          scp -i GFRESHPROJECT2024.pem -o StrictHostKeyChecking=no ./thefurnishstore $EC2_USER@$EC2_IP:/home/ubuntu/WEEK21/thefurnishstore
 
           # SSH into EC2 to restart the service
           ssh -i GFRESHPROJECT2024.pem -o StrictHostKeyChecking=no $EC2_USER@$EC2_IP << 'EOF'
             # Ensure the binary has execution permissions
-            chmod +x /home/ubuntu/WEEK21/user-api
+            chmod +x /home/ubuntu/WEEK21/thefurnishstore
 
             # Restart the service to apply changes
             sudo systemctl restart thefurnishstore.service
