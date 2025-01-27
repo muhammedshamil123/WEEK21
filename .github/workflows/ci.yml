@@ -58,7 +58,7 @@ jobs:
 
           # Build thefurnishstore on EC2
           ssh -i GFRESHPROJECT2024.pem -o StrictHostKeyChecking=no $EC2_USER@$EC2_IP << 'EOF'
-            cd /home/ubuntu/WEEK21/thefurnishstore
+            cd /home/ubuntu/WEEK21
             go mod tidy
             go test ./... -v
             go build -o thefurnishstore ./main.go  # Build thefurnishstore app
