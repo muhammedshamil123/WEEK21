@@ -4,6 +4,7 @@ import (
 	"WEEK21/internal/entity"
 	"WEEK21/internal/repository"
 	"WEEK21/internal/usecase"
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -42,6 +43,7 @@ func main() {
 		}
 
 		c.JSON(http.StatusOK, createdUser)
+		fmt.Println("Created User")
 	})
 
 	r.GET("/users/:id", func(c *gin.Context) {
